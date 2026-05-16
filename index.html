@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invitatie</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: radial-gradient(ellipse at top, #1e293b 0%, #0f172a 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #f1f5f9;
+}
+
+header {
+  width: 100%;
+  padding: 12px 20px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+h1 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #e2e8f0;
+}
+
+.page-info {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: right;
+}
+
+.btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  border-radius: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+.btn:hover  { background: rgba(255,255,255,0.16); color: #fff; border-color: rgba(255,255,255,0.22); }
+.btn:active { background: rgba(255,255,255,0.22); }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn.icon { padding: 5px 10px; font-size: 1rem; }
+
+#wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 32px 16px;
+}
+
+#book { margin: auto; }
+
+footer {
+  padding: 10px;
+  font-size: 0.7rem;
+  color: #475569;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* hide StPageFlip background */
+.stf__parent { background: transparent !important; }
+
+@media (max-width: 500px) {
+  header { flex-wrap: wrap; }
+  h1 { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Invitatie</h1>
+  <span class="page-info" id="pinfo">1 / 1</span>
+  <button class="btn" id="bprev" onclick="go(-1)">&#8592; Prev</button>
+  <button class="btn" id="bnext" onclick="go(1)">Next &#8594;</button>
+  <button class="btn icon" onclick="toggleFull()" title="Toggle fullscreen">&#x26F6;</button>
+</header>
+
+<div id="wrap">
+  <div id="book"></div>
+</div>
+
+<footer>Arrow keys &larr; &rarr; or buttons to navigate &bull; Click page edges to flip</footer>
+
+<script src="page-flip.browser.js"></script>
+<script>
+(function () {
+  const imgs = ["pages/p0001.jpg", "pages/p0002.jpg", "pages/p0003.jpg"];
+  const total = imgs.length;
+  const W = 873, H = 1094;
+
+  const pf = new St.PageFlip(document.getElementById('book'), {
+    width:  W,
+    height: H,
+    size: 'stretch',
+    minWidth:  Math.min(160, W),
+    minHeight: Math.min(220, H),
+    maxWidth:  W * 2,
+    maxHeight: H * 2,
+    maxShadowOpacity: 0.55,
+    showCover: total % 2 === 0,
+    usePortrait: true,
+    drawShadow: true,
+    flippingTime: 650,
+    mobileScrollSupport: false,
+    startZIndex: 1,
+  });
+
+  pf.loadFromImages(imgs);
+  pf.on('flip', e => update(e.data));
+  pf.on('changeOrientation', () => update(pf.getCurrentPageIndex()));
+
+  function update(idx) {
+    document.getElementById('pinfo').textContent =
+      (Math.min(idx + 1, total)) + ' / ' + total;
+    document.getElementById('bprev').disabled = idx === 0;
+    document.getElementById('bnext').disabled = idx >= total - 1;
+  }
+
+  function go(dir) { dir > 0 ? pf.flipNext() : pf.flipPrev(); }
+  window.go = go;
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')  go(-1);
+    if (e.key === 'f' || e.key === 'F') toggleFull();
+  });
+
+  window.toggleFull = function () {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  };
+
+  update(0);
+})();
+</script>
+</body>
+</html>
